@@ -1,0 +1,41 @@
+[tool.poetry]
+name = "pi-ai-assistant"
+version = "0.1.0"
+description = "Local CLI AI assistant for Raspberry Pi 4 (Raspberry Pi OS Lite)"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{ include = "pi_ai_assistant" }]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+click = "^8.1.7"
+rich = "^13.8.0"
+python-dotenv = "^1.0.1"
+requests = "^2.32.3"
+toml = "^0.10.2"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.6.8"
+mypy = "^1.11.2"
+types-requests = "^2.32.0.20240907"
+
+[tool.poetry.scripts]
+pi-assistant = "pi_ai_assistant.cli:main"
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.mypy]
+python_version = "3.9"
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+strict = true
+ignore_missing_imports = true
+
+[build-system]
+requires = ["poetry-core>=1.8.0"]
+build-backend = "poetry.core.masonry.api"
+
+
