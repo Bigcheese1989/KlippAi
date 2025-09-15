@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Basic system deps
 sudo apt update
-sudo apt install -y python3 python3-venv python3-pip git build-essential curl
+sudo apt install -y python3 python3-venv python3-pip git curl
 
 # Install Poetry if missing
 if ! command -v poetry >/dev/null 2>&1; then
@@ -16,16 +16,4 @@ fi
 # Create venv and install
 poetry install --no-root
 
-# Suggest Ollama install and a small model
-if ! command -v ollama >/dev/null 2>&1; then
-	curl -fsSL https://ollama.com/install.sh | sh
-fi
-
-# Start Ollama service
-sudo systemctl enable ollama || true
-sudo systemctl start ollama || true
-
-# Pull a lightweight model
-ollama pull llama3.2:3b || true
-
-echo "Installation complete. Try: poetry run pi-assistant --repl"
+echo "Install complete. Set HF_TOKEN and run: poetry run pi-assistant setup"

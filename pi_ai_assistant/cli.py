@@ -13,7 +13,7 @@ console = Console()
 
 @click.group(invoke_without_command=True, context_settings={"help_option_names": ["-h", "--help"]})
 @click.argument("query", required=False)
-@click.option("--backend", type=click.Choice(["ollama", "llamacpp", "openai"]), help="Override backend")
+@click.option("--backend", type=click.Choice(["huggingface"]), help="Override backend")
 @click.option("--model", type=str, help="Override model name")
 @click.option("--temperature", type=float, help="Sampling temperature override")
 @click.option("--max-tokens", type=int, help="Max tokens override")
@@ -28,10 +28,7 @@ def main(
 	max_tokens: Optional[int],
 	repl: bool,
 ) -> None:
-	"""Local-first CLI AI assistant for Raspberry Pi.
-
-	Provide a QUERY for one-shot mode or use --repl for interactive mode.
-	"""
+	"""Cloud-only CLI AI assistant (Hugging Face Inference API)."""
 	config = load_config(
 		backend_override=backend,
 		model_override=model,
@@ -39,6 +36,9 @@ def main(
 		max_tokens_override=max_tokens,
 	)
 	ctx.obj = config
+
+	if not config.hf_token:
+		console.print("[yellow]Set HF_TOKEN env var or add hf_token to config.toml[/]")
 
 	if ctx.invoked_subcommand is not None:
 		return
@@ -102,7 +102,6 @@ def setup_cmd(config: AppConfig, make_: str, model: str, bed_width: float, bed_d
 		origin_y_mm=origin_y,
 		kinematics=kinematics.lower(),
 	)
-	# Default to existing/localhost URL and only prompt if unreachable
 	moon_url = moonraker_url or config.klipper.moonraker_url
 	klipper = KlipperConfig(moonraker_url=moon_url, api_key=api_key or config.klipper.api_key)
 	ok, _ = test_moonraker_connection(klipper)
@@ -112,12 +111,7 @@ def setup_cmd(config: AppConfig, make_: str, model: str, bed_width: float, bed_d
 		klipper = KlipperConfig(moonraker_url=moon_url, api_key=api_key or config.klipper.api_key)
 
 	write_printer_and_klipper_to_config(printer, klipper)
-
-	ok, detail = test_moonraker_connection(klipper)
-	if ok:
-		console.print(f"[green]Saved config and Moonraker reachable at {klipper.moonraker_url}[/]")
-	else:
-		console.print(f"[yellow]Saved config, but Moonraker not reachable: {detail}[/]")
+	console.print("[green]Saved printer and Klipper settings.[/]")
 
 
 if __name__ == "__main__":

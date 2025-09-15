@@ -31,9 +31,7 @@ class KlipperConfig:
 class AppConfig:
 	backend: str
 	model: str
-	ollama_host: str
-	llamacpp_server_url: str
-	openai_api_key: Optional[str]
+	hf_token: Optional[str]
 	temperature: float
 	max_tokens: int
 	printer: Optional[PrinterConfig]
@@ -41,14 +39,10 @@ class AppConfig:
 
 
 DEFAULTS = {
-	"backend": "ollama",  # ollama | llamacpp | openai
-	"model_ollama": "llama3.2:3b",
-	"model_llamacpp": "tinyllama",
-	"model_openai": "gpt-4o-mini",
-	"ollama_host": "http://localhost:11434",
-	"llamacpp_server_url": "http://localhost:8080",
-	"temperature": 0.2,
-	"max_tokens": 512,
+	"backend": "huggingface",
+	"model_huggingface": "mistralai/Mistral-7B-Instruct-v0.2",
+	"temperature": 0.3,
+	"max_tokens": 256,
 	"moonraker_url": "http://localhost:7125",
 }
 
@@ -83,7 +77,7 @@ def load_config(
 	file_cfg = _load_toml_config()
 
 	backend = (backend_override or os.getenv("PI_ASSISTANT_BACKEND") or file_cfg.get("backend") or DEFAULTS["backend"]).lower()
-	if backend not in {"ollama", "llamacpp", "openai"}:
+	if backend not in {"huggingface"}:
 		raise ValueError(f"Unsupported backend: {backend}")
 
 	default_model_key = f"model_{backend}"
@@ -96,9 +90,7 @@ def load_config(
 		max_tokens_override or os.getenv("MAX_TOKENS") or file_cfg.get("max_tokens") or DEFAULTS["max_tokens"]
 	)
 
-	ollama_host = os.getenv("OLLAMA_HOST") or file_cfg.get("ollama_host") or DEFAULTS["ollama_host"]
-	llamacpp_server_url = os.getenv("LLAMACPP_SERVER_URL") or file_cfg.get("llamacpp_server_url") or DEFAULTS["llamacpp_server_url"]
-	openai_api_key = os.getenv("OPENAI_API_KEY") or file_cfg.get("openai_api_key")
+	hf_token = os.getenv("HF_TOKEN") or os.getenv("HUGGING_FACE_HUB_TOKEN") or file_cfg.get("hf_token")
 
 	moonraker_url = os.getenv("MOONRAKER_URL") or (file_cfg.get("klipper") or {}).get("moonraker_url") or DEFAULTS["moonraker_url"]
 	klipper_api_key = os.getenv("KLIPPER_API_KEY") or (file_cfg.get("klipper") or {}).get("api_key")
@@ -122,9 +114,7 @@ def load_config(
 	config = AppConfig(
 		backend=backend,
 		model=model,
-		ollama_host=ollama_host,
-		llamacpp_server_url=llamacpp_server_url,
-		openai_api_key=openai_api_key,
+		hf_token=hf_token,
 		temperature=temperature,
 		max_tokens=max_tokens,
 		printer=printer,
